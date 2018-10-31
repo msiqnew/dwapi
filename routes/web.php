@@ -14,3 +14,13 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/products', function () {
+//       return new \App\Http\Resources\ProductResource(\App\Product::find(1));
+       return new \App\Http\Resources\ProductCollection(\App\Product::all());
+});
+
+Route::get('/collections', function () {
+//    return new \App\Http\Resources\CollectionResource(\App\Collection::find(1));
+    return new \App\Http\Resources\CollectionCollection(\App\Collection::all());
+});
