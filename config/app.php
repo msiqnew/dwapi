@@ -150,6 +150,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Optimus\Heimdal\Provider\LaravelServiceProvider::class,
 
         /*
          * Application Service Providers...
