@@ -16,15 +16,16 @@ class CollectionController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new CollectionCollection(Collection::all());
+        $fields = $this->processQuery($request, 'productFields');
+        return (new CollectionCollection(Collection::all()))->includeFields($fields);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Request  $request
+     * @param  Request $request
      * @return Response
      */
     public function store(Request $request)
@@ -38,16 +39,17 @@ class CollectionController extends Controller
      * @param Collection $collection
      * @return Response
      */
-    public function show(Collection $collection)
+    public function show(Collection $collection, Request $request)
     {
-        return new CollectionResource($collection);
+        $fields = $this->processQuery($request, 'productFields');
+        return (new CollectionResource($collection))->includeFields($fields);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  Request  $request
-     * @param  int  $id
+     * @param  Request $request
+     * @param  int $id
      * @return Response
      */
     public function update(Request $request, $id)
@@ -58,7 +60,7 @@ class CollectionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return Response
      */
     public function destroy($id)

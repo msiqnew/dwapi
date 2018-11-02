@@ -2,11 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Collection;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Request;
 
 class CollectionCollection extends ResourceCollection
 {
+    use FilterableCollection;
+
     /**
      * Transform the resource collection into an array.
      *
@@ -16,7 +19,11 @@ class CollectionCollection extends ResourceCollection
     public function toArray($request)
     {
         return [
-            'data' => $this->collection,
+            'data' => CollectionResource::collection(
+                $this->collection->map(function (Collection $collection) {
+                    return (new CollectionResource($collection))
+                        ->includeFields($this->withFields);
+                })),
             'meta' => []
         ];
     }

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ProductsException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Product;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ProductCollection;
+use App\Exceptions\ProductsException;
 
 class ProductController extends Controller
 {
@@ -16,15 +16,16 @@ class ProductController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new ProductCollection(Product::all());
+        $fields = $this->processQuery($request);
+        return (new ProductCollection(Product::all()))->includeFields($fields);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Request  $request
+     * @param  Request $request
      * @return Response
      */
     public function store(Request $request)
@@ -38,22 +39,23 @@ class ProductController extends Controller
      * @param  Product $product
      * @return Response
      */
-    public function show(Product $product)
+    public function show(Product $product, Request $request)
     {
-        throw ProductsException::ProductNotFound();
 
         if ($product) {
-            return new ProductResource($product);
+            $fields = $this->processQuery($request);
+            return (new ProductResource($product))->includeFields($fields);
         }
 
+        throw ProductsException::ProductNotFound();
 
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  Request  $request
-     * @param  int  $id
+     * @param  Request $request
+     * @param  int $id
      * @return Response
      */
     public function update(Request $request, $id)
@@ -71,10 +73,9 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         if ($product) {
-            dump($product::destry());
             return response()->json([], 204);
         }
 
-        throw new \Exception('product not found', 404);
+        throw ProductsException::productNotFound();
     }
 }

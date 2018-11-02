@@ -2,11 +2,17 @@
 
 namespace App\Http\Resources;
 
+use App\Product;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Request;
 
-class CollectionResource extends JsonResource
+class CollectionResource extends AbstractFilterableResource
 {
+    /**
+     * @var array
+     */
+    protected $withFields = ['id', 'name', 'size', 'products'];
+
     /**
      * Transform the resource into an array.
      *
@@ -15,12 +21,23 @@ class CollectionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
+        return $this->filterFields([
             'id' => $this->id,
             'name' => $this->name,
             'size' => $this->size,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
+            'products' => ProductResource::collection(
+                $this->products->map([$this, 'mapFieldsQuery'])),
+        ]);
+    }
+
+    /**
+     * @return ProductResource
+     */
+    public function mapFieldsQuery(Product $product): ProductResource
+    {
+        return (new ProductResource($product))
+            ->includeFields(
+                $this->relatedEntityFields('productFields')
+            );
     }
 }
