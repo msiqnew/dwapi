@@ -3,22 +3,24 @@
 namespace App\Repository;
 
 use App\Collection;
-use App\Product;
 
 class CollectionRepository
 {
-
-
-    public function create(string $name, int $size, array $products = [])
+    /**
+     * @param string $name
+     * @param int $size
+     * @return Collection
+     */
+    public function create(string $name, int $size)
     {
         $collection =  new Collection();
         $collection->name = $name;
         $collection->size = $size;
 
-         return $collection;
+        return $collection;
     }
 
-    public function persist(Product $product)
+    public function persist(Collection $product)
     {
         $product->save();
     }

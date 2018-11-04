@@ -11,7 +11,6 @@ class CollectionsException extends BaseHttpException
     const UNPROCESSABLE_DATA = 'Data is not valid';
     const UNPROCESSABLE_DATA_CODE = 202;
 
-
     /**
      * @return CollectionsException
      */

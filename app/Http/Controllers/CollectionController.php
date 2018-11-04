@@ -4,22 +4,40 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-
+use Input;
 use App\Collection;
 use App\Http\Resources\CollectionCollection;
 use App\Http\Resources\CollectionResource;
+use App\Repository\CollectionRepository;
 
 class CollectionController extends Controller
 {
     /**
+     * @var CollectionRepository
+     */
+    private $collectionRepo;
+
+    /**
+     * CollectionController constructor.
+     * @param CollectionRepository $collectionRepository
+     */
+    public function __construct(CollectionRepository $collectionRepository)
+    {
+        $this->collectionRepo = $collectionRepository;
+    }
+
+    /**
      * Display a listing of the resource.
      *
-     * @return Response
+     * @param Request $request
+     * @return $this
      */
     public function index(Request $request)
     {
         $fields = $this->processQuery($request, 'productFields');
-        return (new CollectionCollection(Collection::all()))->includeFields($fields);
+        return (new CollectionCollection(
+            Collection::filter($request)->get()
+        ))->includeFields($fields);
     }
 
     /**
@@ -30,7 +48,16 @@ class CollectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+//        dump('incontttttttt', $request);
+        $collRepo = new CollectionRepository();
+        $collection = $collRepo->create(
+            Input::get('name'),
+            Input::get('size')
+        );
+        $collRepo->persist($collection);
+
+        return new CollectionResource($collection);
+//        return response()->json($collection, 201);
     }
 
     /**

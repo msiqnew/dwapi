@@ -12,6 +12,8 @@ use App\Repository\ProductRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+use App\Services\ImportService;
+
 class ImportController extends Controller
 {
     /**
@@ -24,11 +26,15 @@ class ImportController extends Controller
      */
     private $productRepo;
 
+    private $importService;
+
     public function __construct(
+        ImportService $importService,
         ProductRepository $productRepo,
         CollectionRepository $collectionRepo
     )
     {
+        $this->importService = $importService;
         $this->productRepo = $productRepo;
         $this->collectionRepo = $collectionRepo;
     }
@@ -41,80 +47,13 @@ class ImportController extends Controller
      */
     public function import(Request $request)
     {
-        $collections = $this->importProductsCollections(
-            json_decode($request->getContent(), true)
-        );
+        $collections = $this->importService
+            ->importProductsCollections(
+                json_decode($request->getContent(), true)
+            );
 
-        $collections = collect($collections);
-
-        foreach ($collections as $collection) {
-            foreach ($collection->products() as $product) {
-                $product->collection_id = $collection->id;
-            }
-            $collection->save();
-            $collection->products()->saveMany($collection->products);
-        }
-
-        return new CollectionCollection($collections);
-
-    }
-
-    public function importProductsCollections(array $data)
-    {
-        return array_map(function ($collectionData) {
-            $products = array_map([$this, 'deserializeProduct'], $collectionData['products']);
-            $collection = $this->deserializeCollection($collectionData);
-            array_walk($products, [$collection->products, 'add']);
-
-            return $collection;
-        }, $data);
-    }
-
-    public function deserializeCollection(array $data): Collection
-    {
-        $this->validateCollectionData($data);
-
-        return $this->collectionRepo->create($data['name'], $data['size']);
-    }
-
-    public function deserializeProduct(array $data): Product
-    {
-        $this->validateProductData($data);
-
-        return $this->productRepo->create($data['name'], $data['image'], $data['sku']);
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    public function validateProductData(array &$data)
-    {
-        if (
-            !array_key_exists('name', $data) ||
-            !array_key_exists('image', $data) ||
-            !array_key_exists('sku', $data)
-        ) {
-            throw ProductsException::unprocessableData();
-        }
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    public function validateCollectionData(array &$data)
-    {
-        if (!array_key_exists('name', $data)) {
-            if (array_key_exists('collection', $data)) {
-                $data['name'] = $data['collection'];
-            } else {
-                throw CollectionsException::unprocessableData();
-            }
-        }
-
-        if (!array_key_exists('size', $data)) {
-            throw CollectionsException::unprocessableData();
-        }
+        return (new CollectionCollection($collections))
+            ->response()
+            ->setStatusCode(201);
     }
 }

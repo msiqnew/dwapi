@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Collection;
+use App\Repository\ProductRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Product;
@@ -11,15 +13,33 @@ use App\Exceptions\ProductsException;
 
 class ProductController extends Controller
 {
+    private $productRepo;
+
+    public function __construct(ProductRepository $productRepository)
+    {
+        $this->productRepo = $productRepository;
+    }
+
     /**
      * Display a listing of the resource.
      *
-     * @return Response
+     * @param Request $request
+     * @return $this
      */
     public function index(Request $request)
     {
         $fields = $this->processQuery($request);
-        return (new ProductCollection(Product::all()))->includeFields($fields);
+        $productRepo = new ProductRepository();
+        $productRepo->findAll($request);
+
+        return (new ProductCollection($productRepo->findAll($request)))->includeFields($fields);
+
+//        return (new ProductCollection(
+//            Product::wherein(
+//                'collection_id',
+//                Collection::filter($request)->select('id')->get()
+//            )->get()
+//        ))->includeFields($fields);
     }
 
     /**
@@ -41,7 +61,6 @@ class ProductController extends Controller
      */
     public function show(Product $product, Request $request)
     {
-
         if ($product) {
             $fields = $this->processQuery($request);
             return (new ProductResource($product))->includeFields($fields);

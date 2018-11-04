@@ -2,10 +2,21 @@
 
 namespace App\Repository;
 
+use App\Collection as CollectionModel;
 use App\Product;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductRepository
 {
+    public function findAll(Request $request): Collection
+    {
+        return Product::wherein(
+            'collection_id',
+            CollectionModel::filter($request)->select('id')->get()
+        )->get();
+    }
+
     /**
      * @param string $name
      * @param string $image
