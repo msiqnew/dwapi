@@ -33,13 +33,6 @@ class ProductController extends Controller
         $productRepo->findAll($request);
 
         return (new ProductCollection($productRepo->findAll($request)))->includeFields($fields);
-
-//        return (new ProductCollection(
-//            Product::wherein(
-//                'collection_id',
-//                Collection::filter($request)->select('id')->get()
-//            )->get()
-//        ))->includeFields($fields);
     }
 
     /**

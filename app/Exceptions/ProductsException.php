@@ -11,11 +11,6 @@ class ProductsException extends BaseHttpException
     const UNPROCESSABLE_DATA = 'Data is not valid';
     const UNPROCESSABLE_DATA_CODE = 102;
 
-    public function __construct($statusCode, $message, $code)
-    {
-        parent::__construct($statusCode, $message, null, [], $code);
-    }
-
     public static function productNotFound(): self
     {
         return new self(

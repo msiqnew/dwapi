@@ -24,13 +24,12 @@ class CollectionTest extends TestCase
             ->assertJson(['data' => $data]);
     }
 
-    public function testGetProduct()
-    {
-        $cont = $this->get('api/collections/23')
-            ->assertStatus(200)
-            ->getContent();
-
-        dump($cont);
-    }
-
+//    public function testGetProduct()
+//    {
+//        $cont = $this->get('api/collections/23')
+//            ->assertStatus(200)
+//            ->getContent();
+//
+//        dump($cont);
+//    }
 }

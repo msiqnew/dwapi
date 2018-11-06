@@ -6,14 +6,11 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class ImportServiceTest extends TestCase
+class ImportControllerTest extends TestCase
 {
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testImportProductsCollections_imports()
+    use RefreshDatabase;
+
+    public function testPostImport_works()
     {
         $data = [
             [
@@ -53,6 +50,23 @@ class ImportServiceTest extends TestCase
         $this->json('POST', 'api/import', $data)
             ->assertStatus(201);
 
-        // test if product added in db
+        foreach ($data as $collec) {
+            $this->assertDatabaseHas('collections', [
+                'name' => $collec['collection'],
+                'size' => $collec['size'],
+            ]);
+
+            foreach($collec['products'] as $prod) {
+                $this->assertDatabaseHas('products', [
+                    'image' => $prod['image'],
+                    'name' => $prod['name'],
+                    'sku' => $prod['sku'],
+                ]);
+            }
+        }
+
+        //TODO: test number or records in db are as expected
+
+
     }
 }
